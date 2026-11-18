@@ -76,7 +76,8 @@ ShellRoot {
         }
         going = t.name;
         stage = "cover";
-        swap.command = ["sh", "-c", '~/.config/rice/rice "$1" >/dev/null 2>&1', "sh", t.name];
+        // (quiet: no "Rice switched" notification, the switch itself says so)
+        swap.command = ["sh", "-c", '~/.config/rice/rice "$1" --quiet >/dev/null 2>&1', "sh", t.name];
         coverUp.restart();
     }
     Timer {

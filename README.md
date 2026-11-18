@@ -1,37 +1,53 @@
-# ShellSwitcher
+<h1 align="center">ShellSwitcher</h1>
 
-Switch between [Quickshell](https://quickshell.org) shells on Hyprland without a flash: every rice theme that runs
-a Quickshell shell is a card (its name, the shell, its last look), and picking one swaps to it under a cover of
-the desktop as it was, which fades away once the new shell is up.
+<p align="center"><b>Change your whole desktop in a second, without it ever blinking.</b><br>
+Free, and made for <a href="https://quickshell.org">Quickshell</a> on Hyprland.</p>
 
-It's the switcher for the `rice` theme switcher in my [dotfiles](https://github.com/BugzySleeps/bugzysdotfiles),
-whose Quickshell rices are [liquid](https://github.com/BugzySleeps/liquid) and
-[PureShell](https://github.com/BugzySleeps/PureShell). It runs on its own, apart from either shell, so it's still
-there while one goes and the next comes.
+<p align="center"><img src="docs/switch.gif" alt="switching from PureShell to liquid and back: the screen never goes blank"></p>
 
-## How it switches
+You've built more than one shell. One for focus, one for fun, one you're still tinkering with. Switching between
+them usually means killing one, starting another, and watching your bar vanish, your wallpaper flash and your
+notifications go missing for a moment.
 
-1. Before it shows, a screenshot of the desktop as it is: the cover for the swap, and the current theme's card
-   (kept in `~/.cache/rice/previews/`, so every card shows that shell as you last left it).
-2. Pick a card: the cover comes up, so the screen looks unchanged, and `rice <theme>` swaps the theme and the
-   shell underneath it.
-3. Once the new shell answers (`qs -c <its config> ipc show`), the cover fades away and the switcher quits.
+ShellSwitcher makes it feel like flipping a page. Press `SUPER + ALT + S`, pick one, and your desktop simply
+becomes the other one.
 
-## Use it
+## See them all, as you left them
+
+Every shell you have is a card, showing what it looked like the last time you used it, so you're choosing by
+sight, not by name. The one you're on is marked. Arrow keys or the mouse to choose, Enter to go, Esc to stay.
+
+<p align="center"><img src="docs/cards.png" alt="the switcher's cards: liquid and PureShell, each as it was last left"></p>
+
+## No blink, no blank bar
+
+The trick: the moment you pick, the switcher covers your screen with a picture of it exactly as it was. Behind
+that, the old shell steps out and the new one comes in: its bar, its wallpaper, its colours, your terminal's
+colours too. It waits until the new shell is truly up and drawn, then lets the picture melt away. You never see
+the in-between.
+
+It runs on its own, apart from every shell, so it's still there while one goes and the next arrives, and it
+quits when it's done. Nothing stays running in the background.
+
+## Made for themes with a light and a dark side
+
+A theme can have versions (PureShell's light and dark): they share one card, and it knows which you're in.
+
+## Get it
+
+ShellSwitcher is part of my [dotfiles](https://github.com/BugzySleeps/bugzysdotfiles), whose `rice` theme switcher
+does the swapping. Its shells so far: [liquid](https://github.com/BugzySleeps/liquid), a glowing liquid shell, and
+[PureShell](https://github.com/BugzySleeps/PureShell), a calm cream one.
 
 ```sh
-qs -c switcher        # open it (the dotfiles bind it to SUPER + ALT + S); a second one does nothing
+qs -c switcher        # open it (the dotfiles bind it to SUPER + ALT + S)
 ```
 
-← → or Tab to choose (or the mouse), Enter or a click to switch, Esc or a click outside to close.
+Any rice theme with `quickshell = "<config>"` in its `theme.toml` gets a card on its own.
 
-## Needs
-
-- Quickshell (Qt 6.9+), Hyprland
-- `rice` from the dotfiles (`rice list --json` for the themes, `rice <theme>` to switch)
-- `grim` for the screenshots
-- Google Sans Flex (in the dotfiles' `fonts/`)
+**Needs:** Quickshell (Qt 6.9+), Hyprland, `rice` from the dotfiles, `grim`, and Google Sans Flex (in the
+dotfiles' fonts).
 
 ## Licence
 
-See [LICENSE](LICENSE): free to run and to change for yourself, not to copy into other projects or republish.
+Free to use and to change for yourself, not to copy into other projects or republish. See [LICENSE](LICENSE).
