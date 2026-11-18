@@ -23,17 +23,19 @@ ShellRoot {
     property string stage: "shoot"              // shoot · pick · cover (swapping) · reveal (fading out)
     property string going: ""                   // the theme being switched to
     property string coverStamp: ""
-    property var shots: []                       // the themes with a screenshot of their own (previews/<name>.png)
+    property var shots: []
+    property string previewOfNow: ""             // the screenshot just taken (named for the theme that's on, a version or not)                       // the themes with a screenshot of their own (previews/<name>.png)
 
     // 1. the desktop as it is: full size for the cover, small for this theme's card
     Process {
         running: true
-        command: ["sh", "-c", 'mkdir -p "$1" "$2" && grim "$1/cover.png" && cur=$(cat ~/.config/rice/current 2>/dev/null) && [ -n "$cur" ] && grim -s 0.4 "$2/$cur.png"; date +%s%N; ls "$2"', "sh", root.run, root.previews]
+        command: ["sh", "-c", 'mkdir -p "$1" "$2" && grim "$1/cover.png" && cur=$(cat ~/.config/rice/current 2>/dev/null) && [ -n "$cur" ] && grim -s 0.4 "$2/$cur.png"; date +%s%N; echo "$cur"; ls "$2"', "sh", root.run, root.previews]
         stdout: StdioCollector {
             onStreamFinished: {
                 const lines = text.trim().split("\n");
                 root.coverStamp = lines[0];
-                root.shots = lines.slice(1);
+                root.previewOfNow = lines[1] ?? "";
+                root.shots = lines.slice(2);
                 lister.running = true;
             }
         }
@@ -43,14 +45,21 @@ ShellRoot {
         command: ["sh", "-c", "~/.config/rice/rice list --json"]
         stdout: StdioCollector {
             onStreamFinished: {
+                let all;
                 try {
-                    root.themes = JSON.parse(text).filter(t => t.qs);   // the Quickshell ones (no waybar rices)
+                    all = JSON.parse(text);
                 } catch (e) {
                     Qt.quit();
                     return;
                 }
-                root.current = root.themes.find(t => t.current)?.name ?? "";
-                root.pick = Math.max(0, root.themes.findIndex(t => t.current));
+                // the Quickshell ones (no waybar rices), and not a theme's other version (pure-dark is Pure's card)
+                root.themes = all.filter(t => t.qs && !t.variant_of);
+                const now = all.find(t => t.current);
+                root.current = now ? (now.variant_of || now.name) : "";
+                // on a version (pure-dark): its screenshot is the card's (Pure)
+                if (now?.variant_of)
+                    Quickshell.execDetached(["cp", root.previews + "/" + now.name + ".png", root.previews + "/" + now.variant_of + ".png"]);
+                root.pick = Math.max(0, root.themes.findIndex(t => t.name === root.current));
                 root.stage = "pick";
             }
         }
@@ -247,7 +256,8 @@ ShellRoot {
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
                                 sourceSize: Qt.size(560, 296)
-                                source: root.shots.includes(card.modelData.name + ".png") ? "file://" + root.previews + "/" + card.modelData.name + ".png?" + (card.modelData.current ? root.coverStamp : "") : card.modelData.wallpaper ? "file://" + card.modelData.wallpaper : ""
+                                readonly property bool isNow: card.modelData.name === root.current
+                                source: isNow || root.shots.includes(card.modelData.name + ".png") ? "file://" + root.previews + "/" + (isNow && root.previewOfNow ? root.previewOfNow : card.modelData.name) + ".png?" + (isNow ? root.coverStamp : "") : card.modelData.wallpaper ? "file://" + card.modelData.wallpaper : ""
                                 layer.enabled: true
                                 layer.effect: MultiEffect {
                                     maskEnabled: true
@@ -297,7 +307,7 @@ ShellRoot {
                                         }
                                     }
                                     Rectangle {
-                                        visible: card.modelData.current
+                                        visible: card.modelData.name === root.current
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: nowText.implicitWidth + 14
                                         height: 20
