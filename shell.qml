@@ -77,7 +77,8 @@ ShellRoot {
         going = t.name;
         stage = "cover";
         // (quiet: no "Rice switched" notification, the switch itself says so)
-        swap.command = ["sh", "-c", '~/.config/rice/rice "$1" --quiet >/dev/null 2>&1', "sh", t.name];
+        // (back to the version of it used last: Mac Dark, if that's where you left it)
+        swap.command = ["sh", "-c", '~/.config/rice/rice "$1" --quiet >/dev/null 2>&1', "sh", t.last || t.name];
         coverUp.restart();
     }
     Timer {
